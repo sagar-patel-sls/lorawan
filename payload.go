@@ -373,9 +373,9 @@ type JoinAcceptPayload struct {
 
 // MarshalBinary marshals the object in binary form.
 func (p JoinAcceptPayload) MarshalBinary() ([]byte, error) {
-	if p.RXDelay > 15 {
-		return nil, errors.New("lorawan: the max value of RXDelay is 15")
-	}
+	// if p.RXDelay > 15 {
+	// 	return nil, errors.New("lorawan: the max value of RXDelay is 15")
+	// }
 
 	out := make([]byte, 0, 12)
 
