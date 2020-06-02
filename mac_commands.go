@@ -87,13 +87,14 @@ type macPayloadInfo struct {
 // list.
 var macPayloadRegistry = map[bool]map[CID]macPayloadInfo{
 	false: map[CID]macPayloadInfo{
-		ResetConf:           {1, func() MACCommandPayload { return &ResetConfPayload{} }},
-		LinkCheckAns:        {2, func() MACCommandPayload { return &LinkCheckAnsPayload{} }},
-		LinkADRReq:          {4, func() MACCommandPayload { return &LinkADRReqPayload{} }},
-		DutyCycleReq:        {1, func() MACCommandPayload { return &DutyCycleReqPayload{} }},
-		RXParamSetupReq:     {4, func() MACCommandPayload { return &RXParamSetupReqPayload{} }},
-		NewChannelReq:       {5, func() MACCommandPayload { return &NewChannelReqPayload{} }},
-		RXTimingSetupReq:    {1, func() MACCommandPayload { return &RXTimingSetupReqPayload{} }},
+		ResetConf:       {1, func() MACCommandPayload { return &ResetConfPayload{} }},
+		LinkCheckAns:    {2, func() MACCommandPayload { return &LinkCheckAnsPayload{} }},
+		LinkADRReq:      {4, func() MACCommandPayload { return &LinkADRReqPayload{} }},
+		DutyCycleReq:    {1, func() MACCommandPayload { return &DutyCycleReqPayload{} }},
+		RXParamSetupReq: {4, func() MACCommandPayload { return &RXParamSetupReqPayload{} }},
+		NewChannelReq:   {5, func() MACCommandPayload { return &NewChannelReqPayload{} }},
+		// RXTimingSetupReq:    {1, func() MACCommandPayload { return &RXTimingSetupReqPayload{} }},
+		RXTimingSetupReq:    {1, func() MACCommandPayload { return &SLSRXTimingSetupReqPayload{} }},
 		TXParamSetupReq:     {1, func() MACCommandPayload { return &TXParamSetupReqPayload{} }},
 		DLChannelReq:        {4, func() MACCommandPayload { return &DLChannelReqPayload{} }},
 		BeaconFreqReq:       {3, func() MACCommandPayload { return &BeaconFreqReqPayload{} }},
@@ -693,6 +694,28 @@ func (p RXTimingSetupReqPayload) MarshalBinary() ([]byte, error) {
 
 // UnmarshalBinary decodes the object from binary form.
 func (p *RXTimingSetupReqPayload) UnmarshalBinary(data []byte) error {
+	if len(data) != 1 {
+		return errors.New("lorawan: 1 byte of data is expected")
+	}
+	p.Delay = data[0]
+	return nil
+}
+
+// SLSRXTimingSetupReqPayload represents the RXTimingSetupReq payload.
+type SLSRXTimingSetupReqPayload struct {
+	Delay uint8 `json:"delay"` // 0=1s, 1=1s, 2=2s, ... 15=15s
+}
+
+// MarshalBinary marshals the object in binary form.
+func (p SLSRXTimingSetupReqPayload) MarshalBinary() ([]byte, error) {
+	// if p.Delay > 15 {
+	// 	return []byte{}, errors.New("lorawan: the max value of Delay is 15")
+	// }
+	return []byte{p.Delay}, nil
+}
+
+// UnmarshalBinary decodes the object from binary form.
+func (p *SLSRXTimingSetupReqPayload) UnmarshalBinary(data []byte) error {
 	if len(data) != 1 {
 		return errors.New("lorawan: 1 byte of data is expected")
 	}
